@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="login.css">
+    {{ parent() }}
+{% endblock %}
+{% block body %}
+    <div class="login-page">
+        <div class="form">
+            <a href="/admin/product/create">Add product</a>
+        </div>
+    </div>
+{% endblock %}

@@ -7,16 +7,25 @@
 {% block body %}
     <div class="login-page">
         <div class="form">
-            <form class="register-form" action="auth/register" method="post">
+            {% if error %}
+                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
+            <form class="register-form" action="register" method="post">
                 <input type="text" name="name" placeholder="name" required/>
-                <input type="email" name="email" placeholder="email address" required/>
+                <input type="email" name="email" placeholder="email address" value="{{ last_username }}" required/>
                 <input type="password" name="password" placeholder="password" required/>
+                <input type="hidden" name="_csrf_token"
+                       value="{{ csrf_token('authenticate') }}"
+                >
                 <button>create</button>
                 <p class="message">Already registered? <a href="#">Sign In</a></p>
             </form>
-            <form class="login-form" action="auth/login" method="post">
-                <input type="email" name="email" placeholder="email" required/>
+            <form class="login-form" action="login" method="post">
+                <input type="email" name="email" placeholder="email" value="{{ last_username }}" required/>
                 <input type="password" name="password" placeholder="password" required/>
+                <input type="hidden" name="_csrf_token"
+                       value="{{ csrf_token('authenticate') }}"
+                >
                 <button>login</button>
                 <p class="message">Not registered? <a href="#">Create an account</a></p>
             </form>

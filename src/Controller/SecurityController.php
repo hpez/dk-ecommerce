@@ -8,33 +8,25 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-class AuthController extends AbstractController
+class SecurityController extends AbstractController
 {
     /**
-     * @Route("/login", methods="GET")
+     * @Route("/login", name="app_login")
      */
-    public function index()
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        return $this->render('auth/login.html.twig');
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
 
     /**
-     * @Route("/auth/login", methods="POST")
-     */
-    public function login(Request $request, UserPasswordEncoderInterface $passwordEncoder)
-    {
-        $userRepository = $this->getDoctrine()->getRepository(User::class);
-        $user = $userRepository->findOneBy([
-            'email' => $request->get('email')
-        ]);
-        if ($user && $passwordEncoder->isPasswordValid($user, $request->get('password')))
-            return new Response("successful");
-        return new Response("unsuccessful");
-    }
-
-    /**
-     * @Route("/auth/register", methods="POST")
+     * @Route("/register", methods="POST")
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
@@ -49,7 +41,7 @@ class AuthController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
-            return new Response('successful');
+            return $this->render("dashboard.html.twig");
         }
         return new Response('unsuccessful');
     }

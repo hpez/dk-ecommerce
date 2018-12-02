@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/login.css">
+    {{ parent() }}
+{% endblock %}
+{% block body %}
+    <div class="login-page">
+        <div class="form">
+            <form class="login-form" action="/admin/product/store" method="post">
+                <input type="text" name="title" placeholder="title" required/>
+                <textarea name="description" placeholder="description"></textarea>
+                <a href="#" id="add-variant">add variant</a>
+                <div id="variants"></div>
+                <button>create</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $('#add-variant').click(function (event) {
+            var variantTag = '<div class="variant" style="border-top: gray solid 1px">' +
+                '<input type="text" name="colors[]" placeholder="color">' +
+                '<input type="number" name="prices[]" placeholder="price">' +
+                '<div> ';
+            $('#variants').append(variantTag);
+        });
+    </script>
+{% endblock %}
