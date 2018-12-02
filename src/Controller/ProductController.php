@@ -29,7 +29,6 @@ class ProductController extends AbstractController
         $product = new Product();
         $product->setTitle($request->get('title'));
         $product->setDescription($request->get('description'));
-        $product->setUserId($this->getUser()->getId());
         $entityManager->persist($product);
         $entityManager->flush();
 
