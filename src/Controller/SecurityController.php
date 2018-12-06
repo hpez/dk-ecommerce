@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
@@ -28,7 +31,7 @@ class SecurityController extends AbstractController
     /**
      * @Route("/register", methods="POST")
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder)
+    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, RouterInterface $router)
     {
         $userRepository = $this->getDoctrine()->getRepository(User::class);
         $user = $userRepository->findOneBy([
@@ -41,8 +44,8 @@ class SecurityController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
-            return $this->render("dashboard.html.twig");
+            return new RedirectResponse($router->generate('app_product_index'));
         }
-        return new Response('unsuccessful');
+        throw new CustomUserMessageAuthenticationException('A user with this email already exist.');
     }
 }

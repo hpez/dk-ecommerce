@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -27,9 +29,14 @@ class Product
     private $description;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\OneToMany(targetEntity="App\Entity\Variant", mappedBy="product", orphanRemoval=true)
      */
-    private $user_id;
+    private $variants;
+
+    public function __construct()
+    {
+        $this->variants = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -60,14 +67,33 @@ class Product
         return $this;
     }
 
-    public function getUserId(): ?int
+    /**
+     * @return Collection|Variant[]
+     */
+    public function getVariants(): Collection
     {
-        return $this->user_id;
+        return $this->variants;
     }
 
-    public function setUserId(int $user_id): self
+    public function addVariant(Variant $variant): self
     {
-        $this->user_id = $user_id;
+        if (!$this->variants->contains($variant)) {
+            $this->variants[] = $variant;
+            $variant->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVariant(Variant $variant): self
+    {
+        if ($this->variants->contains($variant)) {
+            $this->variants->removeElement($variant);
+            // set the owning side to null (unless already changed)
+            if ($variant->getProduct() === $this) {
+                $variant->setProduct(null);
+            }
+        }
 
         return $this;
     }

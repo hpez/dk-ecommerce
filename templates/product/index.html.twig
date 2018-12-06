@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/login.css">
+    {{ parent() }}
+{% endblock %}
+{% block body %}
+    <div class="login-page">
+        <div class="form">
+            {% if app.user %}
+                <a href="/admin/product/create">Add product</a><br>
+                {% for product in products %}
+                    <a href="/admin/product/edit/{{ product.id }}">{{ product.title }}</a><br>
+                {% endfor %}
+            {% else %}
+                {% for product in products %}
+                    <a href="/product/show/{{ product.id }}">{{ product.title }}</a>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

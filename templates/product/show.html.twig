@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/login.css">
+    {{ parent() }}
+{% endblock %}
+{% block body %}
+    <div class="login-page">
+        <div class="form">
+            <h3>{{ product.title }}</h3>
+            {% for variant in variants %}
+                <p>{{ variant.color }}</p>
+                <i>{{ variant.price }}</i>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

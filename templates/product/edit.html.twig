@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/login.css">
+    {{ parent() }}
+{% endblock %}
+{% block body %}
+    <div class="login-page">
+        <div class="form">
+            <form class="login-form" action="/admin/product/update/{{ product.id }}" method="post">
+                <input type="text" name="title" placeholder="title" value="{{ product.title }}" required/>
+                <textarea name="description" placeholder="description">{{ product.description }}</textarea>
+                <a href="#" id="add-variant">add variant</a>
+                <a href="#" id="remove-variant">remove variant</a>
+                <div id="variants">
+                    {% for variant in variants %}
+                        <div class="variant" style="border-top: gray solid 1px">
+                            <input type="text" name="colors[]" placeholder="color" value="{{ variant.color }}">
+                            <input type="number" name="prices[]" placeholder="price" value="{{ variant.price }}">
+                        <div>
+                    {% endfor %}
+                </div>
+                <button>edit</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $('#add-variant').click(function (event) {
+            var variantTag = '<div class="variant" style="border-top: gray solid 1px">' +
+                '<input type="text" name="colors[]" placeholder="color">' +
+                '<input type="number" name="prices[]" placeholder="price">' +
+                '<div> ';
+            $('#variants').append(variantTag);
+        });
+        $('#remove-variant').click(function (event) {
+            $('.variant').remo
+        });
+    </script>
+{% endblock %}
