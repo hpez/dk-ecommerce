@@ -6,10 +6,16 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Entity\Variant;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class ProductController extends AbstractController
 {
@@ -46,21 +52,22 @@ class ProductController extends AbstractController
 
         $prices = $request->get('prices');
         $colors = $request->get('colors');
-        foreach ($colors as $key => $color)
-        {
-            $variant = new Variant();
-            $variant->setColor($color);
-            $variant->setPrice($prices[$key]);
-            $variant->setProductId($product->getId());
-            $entityManager->persist($variant);
-        }
+        if (is_array($colors))
+            foreach ($colors as $key => $color)
+            {
+                $variant = new Variant();
+                $variant->setColor($color);
+                $variant->setPrice($prices[$key]);
+                $variant->setProductId($product->getId());
+                $entityManager->persist($variant);
+            }
         $entityManager->flush();
 
         return new RedirectResponse($router->generate('app_product_index'));
     }
 
     /**
-     * @Route("/product/show/{id}", methods="GET")
+     * @Route("/product/show/{id}", methods="GET", defaults={"id" = null})
      */
     public function show($id)
     {
@@ -109,5 +116,21 @@ class ProductController extends AbstractController
         $entityManager->flush();
 
         return new RedirectResponse($router->generate('app_product_index'));
+    }
+
+    /**
+     * @Route("/product/search/{query}", methods="GET", defaults={"query" = null})
+     */
+    public function search($query, $finder)
+    {
+        $results = $finder->find($query);
+        $normalizer = new ObjectNormalizer();
+        $normalizer->setCircularReferenceLimit(2);
+        $normalizer->setCircularReferenceHandler(function ($object) {
+            return $object->getId();
+        });
+        $normalizers = array($normalizer);
+        $serializer = new Serializer($normalizers, array(new JsonEncoder()));
+        return new JsonResponse(json_decode($serializer->serialize($results, 'json')));
     }
 }

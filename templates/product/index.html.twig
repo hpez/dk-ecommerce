@@ -1,22 +1,48 @@
 {% extends 'base.html.twig' %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="/login.css">
+    <link rel="stylesheet" href="{{ asset('login.css') }}">
     {{ parent() }}
 {% endblock %}
 {% block body %}
     <div class="login-page">
         <div class="form">
             {% if app.user %}
-                <a href="/admin/product/create">Add product</a><br>
-                {% for product in products %}
-                    <a href="/admin/product/edit/{{ product.id }}">{{ product.title }}</a><br>
-                {% endfor %}
+                <a href="{{ path('app_product_create') }}">Add product</a><br>
+                <div id="products">
+                    {% for product in products %}
+                        <a href="{{ path('app_product_edit', {'id': product.id}) }}">{{ product.title }}</a><br>
+                    {% endfor %}
+                </div>
             {% else %}
-                {% for product in products %}
-                    <a href="/product/show/{{ product.id }}">{{ product.title }}</a>
-                {% endfor %}
+                <input type="text" style="width: 100%;" placeholder="search" id="search">
+                <div id="products">
+                    {% for product in products %}
+                        <a href="{{ path('app_product_show', {'id': product.id}) }}">{{ product.title }}</a><br>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
     </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $('#search').keypress(function (e) {
+            let key = e.which;
+            if(key == 13)
+            {
+                $.ajax({
+                    url: '{{ path('app_product_search') }}/' + $('#search').val(),
+                    success: function (result) {
+                        html = '';
+                        for (let i = 0; i < result.length; i++) {
+                            html += '<a href="{{ path('app_product_show') }}/'+ result[i].id +'">'+ result[i].title +'</a><br>';
+                        }
+                        $('#products').html(html);
+                    }
+                })
+            }
+        });
+    </script>
 {% endblock %}
