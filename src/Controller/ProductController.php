@@ -5,7 +5,11 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Entity\Variant;
+use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
+use Symfony\Component\Cache\Simple\RedisCache;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -121,9 +125,20 @@ class ProductController extends AbstractController
     /**
      * @Route("/product/search/{query}", methods="GET", defaults={"query" = null})
      */
-    public function search($query, $finder)
+    public function search($query, $finder, LoggerInterface $logger)
     {
-        $results = $finder->find($query);
+        $client = RedisAdapter::createConnection(getenv('REDIS_URL'));
+        $cache = new RedisCache($client);
+        if ($cache->has($query))
+            $results = $cache->get($query);
+        else {
+            $results = $finder->find($query);
+            try {
+                $cache->set($query, $results, 20);
+            } catch (InvalidArgumentException $e) {
+                $logger->error('Error while caching');
+            }
+        }
         $normalizer = new ObjectNormalizer();
         $normalizer->setCircularReferenceLimit(2);
         $normalizer->setCircularReferenceHandler(function ($object) {
